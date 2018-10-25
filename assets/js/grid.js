@@ -28,14 +28,14 @@ function grid(X,Y,pixel,m){
   };
 };
 
-  function SelectColor(i,j,table){
-    switch(table.IsCoordVisible(i,j))
-    {
-      case -1:
-      ctx.fillStyle="black";
-      break;
+function SelectColor(i,j,table){
+  switch(table.IsCoordVisible(i,j))
+  {
+    case -1:
+    ctx.fillStyle="black";
+    break;
 
-      case 1:
+    case 1:
       ctx.fillStyle="#ff342d";	//red
       break;
       case 2:
@@ -66,15 +66,15 @@ function grid(X,Y,pixel,m){
     }
   };
 
-function walls()
-{
-  for(i=0;i<plan.WorldX.length;i++)
+  function walls()
   {
-    plan.SetCoordVisibility(i,rng,8);
-  }
-};
+    for(i=0;i<plan.WorldX.length;i++)
+    {
+      plan.SetCoordVisibility(i,rng,8);
+    }
+  };
 
-function dessiner(){
+  function dessiner(){
   for(var i=0; i<plan.WorldX.length; i++)		//lines
   {
     for(var j = 0;j<plan.WorldY.length;j++)	//columns
@@ -85,52 +85,48 @@ function dessiner(){
   }
 };
 function doEvent(perso){
-  	$('#survivor').show();
-  	$('#dead').hide();
-  	event = Math.floor(Math.random()*5+1);
-  	if(event ==1){
-      zombieAlive=true;
-  		$('#event').html('Vous etes attaquez par un zombie.');
-      while(zombieAlive){
-  		pcChoice = Math.floor(Math.random()*100+1);
-  	if((perso.ammo==0) && pcChoice >0 && pcChoice < 34 ){
-  		alert("You kill zombie, continue !");
+ $('#survivor').show();
+ $('#dead').hide();
+ event = Math.floor(Math.random()*4+1);
+ if(event >=1 && event<=3){
+  zombieAlive=true;
+  while(zombieAlive && perso.life > 0){
+    $('#event').html('Vous etes attaquez par un zombie.');
+    pcChoice = Math.floor(Math.random()*100+1);
+    if(perso.ammo==0 && pcChoice >0 && pcChoice < 51 ){
+      $('#event').html('Vous etes attaquez par un zombie. Vous avez tué le zombie, continuez.');
       zombieAlive=false;
-  	}else if (perso.ammo >= 1 && pcChoice >0 && pcChoice < 67){
-  		alert("You kill zombie, continue !");
-  		perso.ammo--;
+    }else if (perso.ammo >= 1 && pcChoice >0 && pcChoice < 83){
+      $('#event').html('Vous etes attaquez par un zombie. Vous avez tué le zombie, continuez.');
+      perso.ammo--;
       zombieAlive=false;
-  	}else {
-  		perso.life--;
-  		$('#dead').show();
-  		$('#survivor').hide();
-  		setInterval(function(){
-  			$('#survivor').show();
-  			$('#dead').hide();
-  		},500);
-  		if(perso.life == 0){
-  			alert('your\'re dead, try again');
-  			$('body').css('background','red');
-  			$('#survivor').hide();
-  			$('#dead').show();
-  			$('#gameOver').show();
-  		}
-  	}
+    } else {
+      perso.life--;
+    }
   }
-  }/* else if(event == 2) {
+}
+  /* else if(event == 2) {
   	alert('you are dead');
   	$('body').css('background','red');
   	$('#survivor').hide()
   	$('#gameOver').show()
-  } */else if(event == 3){
-  	$('#event').html('Vous avez trouvé des munitions.');
-  	perso.ammo += 5;
-  }
+  } */
   else if(event == 4){
+  	$('#event').html('Vous avez trouvé des munitions.');
+  	perso.ammo += 1;
+  }
+  else if(event == 5){
   	$('#event').html('Vous avez trouvé une trousse de soins.');
-  	perso.life ++;
+  	perso.life++;
   }
 }
+function isWall(x,y){
+  if(plan.IsCoordVisible(x,y)==8)
+    return true;
+  else
+    return false;
+}
+
 $(function(){
   //1=personnage1 2=personnage2 3=sortie 4=autre
   canvas = document.getElementById('screen');
@@ -142,41 +138,41 @@ $(function(){
   perso2 = new personnage(0,1,5,5);
   rng= getRandomInt(1,plan.WorldY.length-1);
   jeu();
-
-  function isWall(x,y){
-    if(plan.IsCoordVisible(x,y)==8)
-      return true;
-    else
-      return false;
-  }
-
+  $('#infoPerso1').html("Life : "+perso1.life+" Ammo : "+perso1.ammo);
   $(document).keydown(function(e){
-    $('.infoPerso1').html("Life : "+perso1.life+" Ammo : "+perso1.ammo);
-    switch(e.keyCode){
-      case 37:
+    $('#infoPerso1').html("Life : "+perso1.life+" Ammo : "+perso1.ammo);
+    if(perso1.life == 0){
+      $('#event').html('Game Over');
+    }else{
+      switch(e.keyCode){
+        case 37:
         if(perso1.x>0)
           perso1.LEFT();
+        doEvent(perso1);
         break;
 
-      case 38:
-      if(perso1.y>0)
-        perso1.UP();
+        case 38:
+        if(perso1.y>0)
+          perso1.UP();
+        doEvent(perso1);
         break;
 
-      case 39:
-      if(perso1.x<plan.WorldX.length-1)
-        perso1.RIGHT();
+        case 39:
+        if(perso1.x<plan.WorldX.length-1)
+          perso1.RIGHT();
+        doEvent(perso1);
         break;
 
-      case 40:
-      if(perso1.y<plan.WorldY.length-1)
-        perso1.DOWN();
+        case 40:
+        if(perso1.y<plan.WorldY.length-1)
+          perso1.DOWN();
+        doEvent(perso1);
         break;
+      }
+      
+      jeu();
     }
-    doEvent(perso1);
-    jeu();
   });
-
   function jeu(){
     plan.Sweap();
     plan.SetCoordVisibility(plan.WorldX.length-1,plan.WorldY.length-1,1); //sortie
@@ -186,5 +182,5 @@ $(function(){
 
     plan.SetCoordVisibility(perso1.x,perso1.y,3); //perso
     dessiner();
-  };
+  }
 });
