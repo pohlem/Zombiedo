@@ -1,4 +1,5 @@
-function personnage(x,y,life,ammo){
+function personnage(number,x,y,life,ammo){
+  this.number=number;
   this.x=x;
   this.y=y;
   this.life=life;

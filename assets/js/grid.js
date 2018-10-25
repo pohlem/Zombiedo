@@ -87,17 +87,17 @@ function SelectColor(i,j,table){
 function doEvent(perso){
  $('#survivor').show();
  $('#dead').hide();
- event = Math.floor(Math.random()*4+1);
- if(event >=1 && event<=3){
+ event = Math.floor(Math.random()*7+1);
+ if(event >=1 && event<4){
   zombieAlive=true;
   while(zombieAlive && perso.life > 0){
-    $('#event').html('Vous etes attaquez par un zombie.');
+    $('#event'+perso.number).html('Vous etes attaquez par un zombie.');
     pcChoice = Math.floor(Math.random()*100+1);
     if(perso.ammo==0 && pcChoice >0 && pcChoice < 51 ){
-      $('#event').html('Vous etes attaquez par un zombie. Vous avez tué le zombie, continuez.');
+      $('#event'+perso.number).html('Vous êtes attaqué par un zombie. Vous avez tué le zombie, continuez.');
       zombieAlive=false;
     }else if (perso.ammo >= 1 && pcChoice >0 && pcChoice < 83){
-      $('#event').html('Vous etes attaquez par un zombie. Vous avez tué le zombie, continuez.');
+      $('#event'+perso.number).html('Vous êtes attaqué par un zombie. Vous avez tué le zombie, continuez.');
       perso.ammo--;
       zombieAlive=false;
     } else {
@@ -111,7 +111,7 @@ function doEvent(perso){
   	$('#survivor').hide()
   	$('#gameOver').show()
   } */
-  else if(event == 4){
+  else if(event >= 4 || event <= 6){
   	$('#event').html('Vous avez trouvé des munitions.');
   	perso.ammo += 1;
   }
@@ -134,15 +134,20 @@ $(function(){
   canvas.height= $(document).height();
   ctx = canvas.getContext("2d");
   plan = new grid(300,300,10,1);
-  perso1 = new personnage(0,0,5,5);
-  perso2 = new personnage(0,1,5,5);
+  perso1 = new personnage(1,0,1,5,5);
+  perso2 = new personnage(2,1,0,5,5);
   rng= getRandomInt(1,plan.WorldY.length-1);
   jeu();
   $('#infoPerso1').html("Life : "+perso1.life+" Ammo : "+perso1.ammo);
+  $('#infoPerso2').html("Perso 2 Life : "+perso2.life+" Ammo : "+perso2.ammo);
   $(document).keydown(function(e){
-    $('#infoPerso1').html("Life : "+perso1.life+" Ammo : "+perso1.ammo);
+    $('#infoPerso1').html("Perso 1 Life : "+perso1.life+" Ammo : "+perso1.ammo);
+    $('#infoPerso2').html("Perso 2 Life : "+perso2.life+" Ammo : "+perso2.ammo);
     if(perso1.life == 0){
       $('#event').html('Game Over');
+      $('body').html('<img class="imgEnd" src="assets/image/skull.png"></img> Joueur1');
+    }else if(perso2.life ==0){
+      $('body').html('<img class="imgEnd" src="assets/image/skull.png"></img> Joueur2');
     }else{
       switch(e.keyCode){
         case 37:
@@ -168,6 +173,29 @@ $(function(){
           perso1.DOWN();
         doEvent(perso1);
         break;
+         case 81:
+        if(perso2.x>0)
+          perso2.LEFT();
+        doEvent(perso2);
+        break;
+
+        case 90:
+        if(perso2.y>0)
+          perso2.UP();
+        doEvent(perso2);
+        break;
+
+        case 68:
+        if(perso2.x<plan.WorldX.length-1)
+          perso2.RIGHT();
+        doEvent(perso2);
+        break;
+
+        case 83:
+        if(perso2.y<plan.WorldY.length-1)
+          perso2.DOWN();
+        doEvent(perso2);
+        break;
       }
       
       jeu();
@@ -177,10 +205,14 @@ $(function(){
     plan.Sweap();
     plan.SetCoordVisibility(plan.WorldX.length-1,plan.WorldY.length-1,1); //sortie
 
-    if(plan.IsCoordVisible(perso1.x,perso1.y)===1)
-      alert("EXIT");
+    if(plan.IsCoordVisible(perso1.x,perso1.y)===1){
+      $('body').html('<img class="imgEnd" src="assets/image/wingame.png"></img>Joueur 1');
+    } else if(plan.IsCoordVisible(perso2.x,perso2.y)===1){
+      $('body').html('<img class="imgEnd" src="assets/image/skull.png"></img>Joueur 2');
+    }
 
     plan.SetCoordVisibility(perso1.x,perso1.y,3); //perso
+    plan.SetCoordVisibility(perso2.x,perso2.y,4); //perso
     dessiner();
   }
 });
